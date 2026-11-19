@@ -1,0 +1,28 @@
+type: markdown
+title: Real acum – Mureș
+content: |-
+  {% set luni = {'ianuarie':1,'februarie':2,'martie':3,'aprilie':4,'mai':5,'iunie':6,'iulie':7,'august':8,'septembrie':9,'octombrie':10,'noiembrie':11,'decembrie':12} %}
+  {% set nm = {1:'🟡 galben',2:'🟠 portocaliu',3:'🔴 roșu'} %}
+  {% set ns = namespace(l=[]) %}
+  {% for w in (state_attr('sensor.avertizari_meteo_anm','avertizari') or []) if w.judet == 'MS' and (w.culoare|int(0)) > 0 %}
+  {% set p = w.intervalul | regex_findall('(\\d+) ([a-zăâîșț]+), ora (\\d+)') %}
+  {% if p | length == 2 %}
+  {% set s = now().replace(month=luni[p[0][1]], day=p[0][0]|int, hour=p[0][2]|int, minute=0, second=0, microsecond=0) %}
+  {% set e = now().replace(month=luni[p[1][1]], day=p[1][0]|int, hour=p[1][2]|int, minute=0, second=0, microsecond=0) %}
+  {% if s <= now() < e %}
+  {% set ns.l = ns.l + ['**ACUM** ' ~ nm[w.culoare|int] ~ ' · ' ~ w.fenomene_vizate ~ ' · până ' ~ e.strftime('%d.%m %H:%M')] %}
+  {% elif now() < s %}
+  {% set ns.l = ns.l + ['Urmează ' ~ nm[w.culoare|int] ~ ' · ' ~ w.fenomene_vizate ~ ' · ' ~ s.strftime('%d.%m %H:%M') ~ ' – ' ~ e.strftime('%d.%m %H:%M')] %}
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+  ### 🌦️ ANM general
+  {% if ns.l | length == 0 %}✅ Nicio avertizare activă sau viitoare
+  {% else %}{% for x in ns.l %}- {{ x }}
+  {% endfor %}{% endif %}
+
+  ### ⚡ Nowcasting (următoarele ore)
+  {% if state_attr('sensor.alerta_nowcasting_mures','Alerte active')|int(0) > 0 %}**{{ state_attr('sensor.alerta_nowcasting_mures','Culoare') }}** · {{ state_attr('sensor.alerta_nowcasting_mures','semnalare') }}
+  {{ state_attr('sensor.alerta_nowcasting_mures','Început') }} – {{ state_attr('sensor.alerta_nowcasting_mures','Sfârșit') }}
+  {% else %}✅ Fără alertă · actualizat {{ state_attr('sensor.alerta_nowcasting_mures','Ultima actualizare') }}
+  {% endif %}

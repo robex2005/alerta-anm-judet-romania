@@ -55,15 +55,15 @@ class AlertaANMConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         """Obține options flow."""
-        return AlertaANMOptionsFlow(config_entry)
+        return AlertaANMOptionsFlow()
 
 
 class AlertaANMOptionsFlow(config_entries.OptionsFlow):
-    """Options flow pentru Alertă ANM."""
+    """Options flow pentru Alertă ANM.
 
-    def __init__(self, config_entry):
-        """Inițializare options flow."""
-        self.config_entry = config_entry
+    self.config_entry este furnizat automat de Home Assistant (proprietate
+    read-only din 2024.12); nu se mai atribuie manual în __init__.
+    """
 
     async def async_step_init(self, user_input=None):
         """Gestionare opțiuni."""
